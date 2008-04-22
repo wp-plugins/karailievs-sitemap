@@ -1,7 +1,6 @@
 === Karailiev's sitemap ===
 Contributors: Valentin Karailiev
-Donate link: http://www.karailiev.net/
-Tags: seo, sitemap, google
+Tags: seo, sitemap, google, yahoo, msn, xml, xml sitemap
 Requires at least: 2.5
 Tested up to: 2.5
 Stable tag: trunk
