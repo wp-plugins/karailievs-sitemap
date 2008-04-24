@@ -56,7 +56,9 @@
 		}
 		elseif (is_writable($ksm_path)) {
 			$ksm_permission = 2;
-			file_put_contents($ksm_sitemap_path, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" />");
+			$fp = fopen($ksm_sitemap_path, 'w');
+			fwrite($fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" />");
+			fclose($fp);
 			if (is_file($ksm_sitemap_path)) $ksm_permission = 1;
 		}
 		else $ksm_permission = 4;
@@ -129,7 +131,9 @@
 		}
 
 		$out .= "\n</urlset>";
-		file_put_contents($ksm_sitemap_path, $out);
+		$fp = fopen($ksm_sitemap_path, 'w');
+		fwrite($fp, $out);
+		fclose($fp);
 	}
 
 

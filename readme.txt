@@ -14,6 +14,9 @@ It's used to show all your pages and posts to the search engines like Google, Ya
 This plugin adds a XML sitemap to your blog.
 It's used to show all your pages and posts to the search engines like Google, Yahoo and MSN.
 
+Changes in version 0.2.1.hotfix:
+1. Using `fwrite` (available in php4 & php5) instead of `file_put_contents` (available in php5 only)
+
 Changes in version 0.2:
 1. Sitemap file has the usual name `sitemap.xml`
 1. Plugin checks if the file exists and if it's writable
