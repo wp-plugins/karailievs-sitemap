@@ -11,7 +11,7 @@
 	$ksm_path = "../";
 	$ksm_sitemap_name = "sitemap.xml";
 	$ksm_sitemap_path = $ksm_path . $ksm_sitemap_name;
-	$ksm_sitemap_version = 0.2.1;
+	$ksm_sitemap_version = "0.2.1";
 
 	// Add some default options if they don't exist
 	add_option('ksm_active', false);
