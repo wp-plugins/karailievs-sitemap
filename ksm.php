@@ -3,15 +3,14 @@
 		Plugin Name: Karailiev's sitemap
 		Plugin URI: http://www.karailiev.net/karailievs-sitemap/
 		Description: Generates sitemap for users and for spiders.
-		Version: 0.2.2
+		Version: 0.2.3
 		Author: Valentin Karailiev
 		Author URI: http://www.karailiev.net/
 	*/
-
-	$ksm_path = "../";
+	$ksm_path = ABSPATH;
 	$ksm_sitemap_name = "sitemap.xml";
 	$ksm_sitemap_path = $ksm_path . $ksm_sitemap_name;
-	$ksm_sitemap_version = "0.2.2";
+	$ksm_sitemap_version = "0.2.3";
 
 	// Add some default options if they don't exist
 	add_option('ksm_active', false);

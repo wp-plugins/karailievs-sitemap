@@ -14,14 +14,11 @@ It's used to show all your pages and posts to the search engines like Google, Ya
 This plugin adds a XML sitemap to your blog.
 It's used to show all your pages and posts to the search engines like Google, Yahoo and MSN.
 
-Changes in version 0.2.1.hotfix:
-Using `fwrite` (available in php4 & php5) instead of `file_put_contents` (available in php5 only)
-
 Changes in version 0.2:
-Sitemap file has the usual name `sitemap.xml`;
-Plugin checks if the file exists and if it's writable;
-Sitemap is generated only when content changes (new/edit/delete post/page/comment/attachment);
-Sitemap generates URLs according the permalinks settings.
+1. Sitemap file has the usual name `sitemap.xml`
+1. Plugin checks if the file exists and if it's writable
+1. Sitemap is generated only when content changes (new/edit/delete post/page/comment/attachment)
+1. Sitemap generates URLs according the permalinks settings
 
 == Installation ==
 
