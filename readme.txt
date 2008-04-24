@@ -6,6 +6,8 @@ Tested up to: 2.5
 Stable tag: trunk
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=valentin%40karailiev%2enet&item_name=karailievs%2dsitemap&no_shipping=1&no_note=1&tax=0&currency_code=EUR&lc=US&bn=PP%2dDonationsBF&charset=UTF%2d8
 
+IMPORTANT: version 0.2.3 fixes some fatal bugs. Using older versions is NOT recommended!!!
+
 This plugin adds a XML sitemap to your blog.
 It's used to show all your pages and posts to the search engines like Google, Yahoo and MSN.
 
