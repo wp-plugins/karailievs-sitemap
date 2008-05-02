@@ -3,20 +3,24 @@
 		Plugin Name: Karailiev's sitemap
 		Plugin URI: http://www.karailiev.net/karailievs-sitemap/
 		Description: Generates sitemap for users and for spiders.
-		Version: 0.2.3
+		Version: 0.3
 		Author: Valentin Karailiev
 		Author URI: http://www.karailiev.net/
 	*/
 	$ksm_path = ABSPATH;
 	$ksm_sitemap_name = "sitemap.xml";
 	$ksm_sitemap_path = $ksm_path . $ksm_sitemap_name;
-	$ksm_sitemap_version = "0.2.3";
+	$ksm_sitemap_version = "0.3";
 
 	// Add some default options if they don't exist
-	add_option('ksm_active', false);
+	add_option('ksm_active', true);
+	add_option('ksm_comments', false);
+	add_option('ksm_attachments', true);
 
 	// Get options for form fields
 	$ksm_active = stripslashes(get_option('ksm_active'));
+	$ksm_comments = stripslashes(get_option('ksm_comments'));
+	$ksm_attachments = stripslashes(get_option('ksm_attachments'));
 
 	// Add hooks
 	add_action('admin_menu', 'ksm_add_pages');
@@ -29,15 +33,21 @@
 		add_action('publish_post', 'ksm_generate_sitemap');
 		add_action('save_post', 'ksm_generate_sitemap');
 		add_action('xmlrpc_publish_post', 'ksm_generate_sitemap');
-		add_action('comment_post', 'ksm_generate_sitemap');
-		add_action('edit_comment', 'ksm_generate_sitemap');
-		add_action('delete_comment', 'ksm_generate_sitemap');
-		add_action('pingback_post', 'ksm_generate_sitemap');
-		add_action('trackback_post', 'ksm_generate_sitemap');
-		add_action('wp_set_comment_status', 'ksm_generate_sitemap');
-		add_action('add_attachment', 'ksm_generate_sitemap');
-		add_action('edit_attachment', 'ksm_generate_sitemap');
-		add_action('delete_attachment', 'ksm_generate_sitemap');
+
+		if ($ksm_comments) {
+			add_action('comment_post', 'ksm_generate_sitemap');
+			add_action('edit_comment', 'ksm_generate_sitemap');
+			add_action('delete_comment', 'ksm_generate_sitemap');
+			add_action('pingback_post', 'ksm_generate_sitemap');
+			add_action('trackback_post', 'ksm_generate_sitemap');
+			add_action('wp_set_comment_status', 'ksm_generate_sitemap');
+		}
+
+		if ($ksm_attachments) {
+			add_action('add_attachment', 'ksm_generate_sitemap');
+			add_action('edit_attachment', 'ksm_generate_sitemap');
+			add_action('delete_attachment', 'ksm_generate_sitemap');
+		}
 	}
 
 	//Add config page
@@ -68,9 +78,13 @@
 
 	function ksm_generate_sitemap() {
 		global $ksm_sitemap_path, $ksm_sitemap_version, $table_prefix;
+		$ksm_permission = ksm_permissions();
+		if ($ksm_permission > 1) return;
+
 		$t = $table_prefix;
 		$home = stripslashes(get_option('home')) . "/";
 		$ksm_active = stripslashes(get_option('ksm_active'));
+		$ksm_comments = stripslashes(get_option('ksm_comments'));
 
 		$result = mysql_query("
 			SELECT `post_modified`
@@ -86,21 +100,45 @@
 		$homeLastUpdate = substr($homeLastUpdate, 0, 10);
 
 		$result = mysql_query("
-			SELECT
-				`".$t."posts`.`ID`, `".$t."posts`.`post_modified`, `".$t."posts`.`post_name`,
-				`".$t."comments`.`comment_ID`, `".$t."comments`.`comment_post_ID`, `".$t."comments`.`comment_date`
+			SELECT `".$t."posts`.`ID`, `".$t."posts`.`post_modified`, `".$t."posts`.`post_name`
 			FROM `".$t."posts`
-			LEFT JOIN `".$t."comments` ON `".$t."posts`.`ID`=`".$t."comments`.`comment_post_ID`
 			WHERE
 				(`".$t."posts`.`post_type`='page' OR `".$t."posts`.`post_type`='post')
 				AND `".$t."posts`.`post_status`='publish'
-				AND (`".$t."comments`.`comment_approved`='1' OR `".$t."comments`.`comment_approved` IS NULL)
-			GROUP BY `".$t."posts`.`ID`
-			ORDER BY
-				`".$t."posts`.`post_modified` DESC,
-				`".$t."comments`.`comment_date` DESC
+			ORDER BY `".$t."posts`.`post_modified` DESC
 		");
 
+
+		$urls = array();
+		while ($data = mysql_fetch_assoc($result)) {
+			$date = substr($data['post_modified'], 0, 10);
+
+			if ($ksm_comments) {
+				$cresult = mysql_query("
+					SELECT `".$t."comments`.`comment_date`
+					FROM `".$t."comments`
+					WHERE
+						`".$t."comments`.`comment_post_ID`='".$data['ID']."'
+						AND `".$t."comments`.`comment_approved`='1'
+					ORDER BY `".$t."comments`.`comment_date` DESC
+					LIMIT 1
+				");
+
+				if (mysql_num_rows($cresult) > 0) {
+					$cdata = mysql_fetch_assoc($cresult);
+					$commentDate = getdate(strtotime($cdata['comment_date']));
+					$postDate = getdate(strtotime($data['post_modified']));
+					if ($commentDate[0] > $postDate[0]) $date = substr($cdata['comment_date'], 0, 10);
+				}
+			}
+
+			$urls[] = array(
+				"url"		=> get_permalink($data['ID']),
+				"lastmod"	=> $date,
+				"changes"	=> "weekly",
+				"priority"	=> "0.3"
+			);
+		}
 
 		$out = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 		$out .= "\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">
@@ -118,13 +156,13 @@
 	</url>";
 
 		if ($ksm_active) {
-			while ($data = mysql_fetch_assoc($result)) {
+			foreach ($urls as $u) {
 				$out .= "
 	<url>
-		<loc>".get_permalink($data['ID'])."</loc>
-		<lastmod>".substr($data['post_modified'], 0, 10)."</lastmod>
-		<changefreq>weekly</changefreq>
-		<priority>0.3</priority>
+		<loc>".$u['url']."</loc>
+		<lastmod>".$u['lastmod']."</lastmod>
+		<changefreq>".$u['changes']."</changefreq>
+		<priority>".$u['priority']."</priority>
 	</url>";
 			}
 		}
@@ -144,13 +182,18 @@
 		// Check form submission and update options
 		if ('ksm_submit' == $_POST['ksm_submit']) {
 			update_option('ksm_active', $_POST['ksm_active']);
+			update_option('ksm_comments', $_POST['ksm_comments']);
+			update_option('ksm_attachments', $_POST['ksm_attachments']);
 			ksm_generate_sitemap();
 		}
 		$ksm_active = stripslashes(get_option('ksm_active'));
+		$ksm_comments = stripslashes(get_option('ksm_comments'));
+		$ksm_attachments = stripslashes(get_option('ksm_attachments'));
+
 		$ksm_permission = ksm_permissions();
-		if ($ksm_permission == 3) $msg = "Error: sitemap.xml file exists but is not writable. <a href=\"http://www.karailiev.net/karailievs-sitemap/\" target=\"_blank\" >For help see the plugin's homepage</a>";
-		elseif ($ksm_permission == 4) $msg = "Error: sitemap.xml file does not exist and the plugin can not create it. <a href=\"http://www.karailiev.net/karailievs-sitemap/\" target=\"_blank\" >For help see the plugin's homepage</a>";
-		elseif ($ksm_permission == 2) $msg = "Error: sitemap.xml file does not exist and the plugin can not create it. <a href=\"http://www.karailiev.net/karailievs-sitemap/\" target=\"_blank\" >For help see the plugin's homepage</a>";
+		if ($ksm_permission == 3) $msg = "Error: sitemap.xml file exists but is not writable. <a href=\"http://www.karailiev.net/karailievs-sitemap/\" target=\"_blank\" >For help see the plugin's homepage</a>.";
+		elseif ($ksm_permission == 4) $msg = "Error: sitemap.xml file does not exist and the plugin can not create it. <a href=\"http://www.karailiev.net/karailievs-sitemap/\" target=\"_blank\" >For help see the plugin's homepage</a>.";
+		elseif ($ksm_permission == 2) $msg = "Error: sitemap.xml file does not exist and the plugin can not create it. <a href=\"http://www.karailiev.net/karailievs-sitemap/\" target=\"_blank\" >For help see the plugin's homepage</a>.";
 ?>
 	<div class="wrap">
 <?php	if ($msg) {	?>
@@ -166,11 +209,20 @@
 							<input name="ksm_active" type="checkbox" id="ksm_active" value="1" <?php echo $ksm_active?'checked="checked"':''; ?> />
 							Acivate sitemap plugin.
 						</label><br />
+						<br />
+						<label for="ksm_comments">
+							<input name="ksm_comments" type="checkbox" id="ksm_comments" value="1" <?php echo $ksm_comments?'checked="checked"':''; ?> />
+							Use comments' dates.
+						</label><br />
+						<label for="ksm_attachments">
+							<input name="ksm_attachments" type="checkbox" id="ksm_attachments" value="1" <?php echo $ksm_attachments?'checked="checked"':''; ?> />
+							Rebuild on attachments modifications.
+						</label><br />
 					</td>
 				</tr>
 			</table>
 			<p class="submit">
-				<input type="submit" value="Save Changes" />
+				<input type="submit" value="Save &amp; Rebuild" />
 			</p>
 		</form>
 	</div>
