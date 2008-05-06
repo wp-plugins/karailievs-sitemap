@@ -1,4 +1,4 @@
-﻿=== Karailiev's sitemap ===
+=== Karailiev's sitemap ===
 Contributors: Valentin Karailiev
 Tags: seo, sitemap, google, yahoo, msn, xml sitemap, xml
 Requires at least: 2.5
