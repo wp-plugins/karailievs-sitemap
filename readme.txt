@@ -19,18 +19,19 @@ This plugin adds a XML sitemap to your blog.
 It's used to show all your pages and posts to the search engines like Google, Yahoo and MSN.
 
 
-Changes in version 0.4:
+= Changes in version 0.4: =
+
 * Restore lost MySQL server connection (reported by [Matteo](http://www.italiasw.com/))
 * Categories added to the sitemap;
 * Tags added to the sitemap;
 
 
-Changes in version 0.3:
+= Changes in version 0.3: =
 * There is an option to turn on or off sitemap rebuilding when comments are changed (submit/edit/delete);
 * There is an option to turn on or off sitemap rebuilding when attachments are changed (upload/edit/delete);
 
 
-Changes in version 0.2:
+= Changes in version 0.2: =
 * Sitemap file has the usual name `sitemap.xml`;
 * Plugin checks if the file exists and if it's writable;
 * Sitemap is generated only when content changes (new/edit/delete post/page/comment/attachment);
