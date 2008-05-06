@@ -3,24 +3,28 @@
 		Plugin Name: Karailiev's sitemap
 		Plugin URI: http://www.karailiev.net/karailievs-sitemap/
 		Description: Generates sitemap for users and for spiders.
-		Version: 0.3
+		Version: 0.4
 		Author: Valentin Karailiev
 		Author URI: http://www.karailiev.net/
 	*/
+	$ksm_sitemap_version = "0.4";
 	$ksm_path = ABSPATH;
 	$ksm_sitemap_name = "sitemap.xml";
 	$ksm_sitemap_path = $ksm_path . $ksm_sitemap_name;
-	$ksm_sitemap_version = "0.3";
 
 	// Add some default options if they don't exist
 	add_option('ksm_active', true);
 	add_option('ksm_comments', false);
 	add_option('ksm_attachments', true);
+	add_option('ksm_categories', true);
+	add_option('ksm_tags', true);
 
 	// Get options for form fields
 	$ksm_active = stripslashes(get_option('ksm_active'));
 	$ksm_comments = stripslashes(get_option('ksm_comments'));
 	$ksm_attachments = stripslashes(get_option('ksm_attachments'));
+	$ksm_categories = stripslashes(get_option('ksm_categories'));
+	$ksm_tags = stripslashes(get_option('ksm_tags'));
 
 	// Add hooks
 	add_action('admin_menu', 'ksm_add_pages');
@@ -78,14 +82,23 @@
 
 	function ksm_generate_sitemap() {
 		global $ksm_sitemap_path, $ksm_sitemap_version, $table_prefix;
+
 		$ksm_permission = ksm_permissions();
 		if ($ksm_permission > 1) return;
 
+		mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+		mysql_query("SET NAMES '".DB_CHARSET."'");
+		mysql_select_db(DB_NAME);
+
 		$t = $table_prefix;
-		$home = stripslashes(get_option('home')) . "/";
 		$ksm_active = stripslashes(get_option('ksm_active'));
 		$ksm_comments = stripslashes(get_option('ksm_comments'));
+		$ksm_categories = stripslashes(get_option('ksm_categories'));
+		$ksm_tags = stripslashes(get_option('ksm_tags'));
 
+		$urls = array();
+
+		$home = stripslashes(get_option('home')) . "/";
 		$result = mysql_query("
 			SELECT `post_modified`
 			FROM `".$t."posts`
@@ -109,7 +122,6 @@
 		");
 
 
-		$urls = array();
 		while ($data = mysql_fetch_assoc($result)) {
 			$date = substr($data['post_modified'], 0, 10);
 
@@ -132,12 +144,39 @@
 				}
 			}
 
-			$urls[] = array(
+			$urls[$data['ID']] = array(
 				"url"		=> get_permalink($data['ID']),
 				"lastmod"	=> $date,
 				"changes"	=> "weekly",
 				"priority"	=> "0.3"
 			);
+		}
+
+		if ($ksm_categories || $ksm_tags) {
+			$what_kind = "";
+			if ($ksm_categories) $what_kind = "`".$t."term_taxonomy`.`taxonomy`='category'";
+			if ($ksm_tags) {
+				if ($what_kind == "") $what_kind = "`".$t."term_taxonomy`.`taxonomy`='post_tag'";
+				else $what_kind = "(" . $what_kind . " OR `".$t."term_taxonomy`.`taxonomy`='post_tag')";
+			}
+
+			$result = mysql_query("
+				SELECT `".$t."term_taxonomy`.`term_id`, `".$t."term_taxonomy`.`taxonomy`
+				FROM `".$t."term_taxonomy`
+				WHERE
+					`".$t."term_taxonomy`.`count` > 0
+					AND ".$what_kind."
+			");
+			while ($data = mysql_fetch_assoc($result)) {
+				if ($data['taxonomy'] == "category") $u = get_category_link($data['term_id']);
+				elseif ($data['taxonomy'] == "post_tag") $u = get_tag_link($data['term_id']);
+				else continue;
+				$urls['testm_'.$data['term_id']] = array(
+					"url"		=> $u,
+					"changes"	=> "weekly",
+					"priority"	=> "0.1"
+				);
+			}
 		}
 
 		$out = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -160,7 +199,7 @@
 				$out .= "
 	<url>
 		<loc>".$u['url']."</loc>
-		<lastmod>".$u['lastmod']."</lastmod>
+		".(isset($u['lastmod'])?"<lastmod>".$u['lastmod']."</lastmod>":'')."
 		<changefreq>".$u['changes']."</changefreq>
 		<priority>".$u['priority']."</priority>
 	</url>";
@@ -184,11 +223,15 @@
 			update_option('ksm_active', $_POST['ksm_active']);
 			update_option('ksm_comments', $_POST['ksm_comments']);
 			update_option('ksm_attachments', $_POST['ksm_attachments']);
+			update_option('ksm_categories', $_POST['ksm_categories']);
+			update_option('ksm_tags', $_POST['ksm_tags']);
 			ksm_generate_sitemap();
 		}
 		$ksm_active = stripslashes(get_option('ksm_active'));
 		$ksm_comments = stripslashes(get_option('ksm_comments'));
 		$ksm_attachments = stripslashes(get_option('ksm_attachments'));
+		$ksm_categories = stripslashes(get_option('ksm_categories'));
+		$ksm_tags = stripslashes(get_option('ksm_tags'));
 
 		$ksm_permission = ksm_permissions();
 		if ($ksm_permission == 3) $msg = "Error: sitemap.xml file exists but is not writable. <a href=\"http://www.karailiev.net/karailievs-sitemap/\" target=\"_blank\" >For help see the plugin's homepage</a>.";
@@ -210,6 +253,14 @@
 							Acivate sitemap plugin.
 						</label><br />
 						<br />
+						<label for="ksm_categories">
+							<input name="ksm_categories" type="checkbox" id="ksm_categories" value="1" <?php echo $ksm_categories?'checked="checked"':''; ?> />
+							Show categories.
+						</label><br />
+						<label for="ksm_tags">
+							<input name="ksm_tags" type="checkbox" id="ksm_tags" value="1" <?php echo $ksm_tags?'checked="checked"':''; ?> />
+							Show tags.
+						</label><br />
 						<label for="ksm_comments">
 							<input name="ksm_comments" type="checkbox" id="ksm_comments" value="1" <?php echo $ksm_comments?'checked="checked"':''; ?> />
 							Use comments' dates.
