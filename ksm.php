@@ -2,7 +2,7 @@
 	/*
 		Plugin Name: Karailiev's sitemap
 		Plugin URI: http://www.karailiev.net/karailievs-sitemap/
-		Description: Generates sitemap for users and for spiders.
+		Description: Generates sitemap for spiders.
 		Version: 0.4
 		Author: Valentin Karailiev
 		Author URI: http://www.karailiev.net/
