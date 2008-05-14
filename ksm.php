@@ -219,7 +219,7 @@
 			//get_headers("http://www.google.com/webmasters/tools/ping?sitemap=" . urlencode($home . $ksm_path . "sitemap.xml"));
 			$fp = fopen("http://www.google.com/webmasters/tools/ping?sitemap=" . urlencode($home . $ksm_path . "sitemap.xml"), 80);
 			fclose($fp);
-		//	update_option('ksm_last_ping', time());
+			update_option('ksm_last_ping', time());
 		}
 	}
 
