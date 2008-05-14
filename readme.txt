@@ -19,6 +19,10 @@ This plugin adds a XML sitemap to your blog.
 It's used to show all your pages and posts to the search engines like Google, Yahoo and MSN.
 
 
+= Changes in version 0.5.1: =
+* Fixes some compability problems
+
+
 = Changes in version 0.5: =
 * The plugin pings Google on rebuild (no more than once per hour (recommended by Google))
 * Users can change the sitemap's location

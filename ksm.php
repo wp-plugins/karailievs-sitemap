@@ -3,11 +3,11 @@
 		Plugin Name: Karailiev's sitemap
 		Plugin URI: http://www.karailiev.net/karailievs-sitemap/
 		Description: Generates sitemap for spiders.
-		Version: 0.5
+		Version: 0.51
 		Author: Valentin Karailiev
 		Author URI: http://www.karailiev.net/
 	*/
-	$ksm_sitemap_version = "0.5";
+	$ksm_sitemap_version = "0.5.1";
 
 	// Add some default options if they don't exist
 	add_option('ksm_active', true);
@@ -216,8 +216,10 @@
 
 		$ksm_last_ping = get_option('ksm_last_ping');
 		if ((time() - $ksm_last_ping) > 60 * 60) {
-			get_headers("http://www.google.com/webmasters/tools/ping?sitemap=" . urlencode($home . $ksm_path . "sitemap.xml"));
-			update_option('ksm_last_ping', time());
+			//get_headers("http://www.google.com/webmasters/tools/ping?sitemap=" . urlencode($home . $ksm_path . "sitemap.xml"));
+			$fp = fopen("http://www.google.com/webmasters/tools/ping?sitemap=" . urlencode($home . $ksm_path . "sitemap.xml"), 80);
+			fclose($fp);
+		//	update_option('ksm_last_ping', time());
 		}
 	}
 
