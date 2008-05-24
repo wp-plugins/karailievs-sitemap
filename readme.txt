@@ -12,11 +12,13 @@ It's used to show all your pages and posts to the search engines like Google, Ya
 
 
 == Description ==
-
-IMPORTANT: versions 0.2.3+ fix some fatal bugs. Using older versions is NOT recommended!!!
-
 This plugin adds a XML sitemap to your blog.
 It's used to show all your pages and posts to the search engines like Google, Yahoo and MSN.
+
+
+= Changes in version 0.6: =
+* Users can determine the priority of posts, pages, categories and tags
+* Users can determine the change frequency of posts, pages, categories and tags
 
 
 = Changes in version 0.5.1: =
@@ -46,9 +48,18 @@ It's used to show all your pages and posts to the search engines like Google, Ya
 * Sitemap generates URLs according the permalinks settings
 
 == Installation ==
-
 1. Upload `karailievs-sitemap` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Create a file named sitemap.xml in your blog folder. The file must be writable for the web server. See more instructions on [plugin's homepage](http://www.karailiev.net/karailievs-sitemap/)
 1. Turn the sitemap on via the Settings -> Sitemap screen
 1. Open your sitemap to test it (e.g. http://www.karailiev.net/sitemap.xml)
+
+
+== Frequently Asked Questions ==
+= Does this plugin ping Google on change? =
+Yes, it does.
+
+= Can I mess everything up? =
+I've tried to make the plugin easy to use and configure.
+Until you do not change the advanced settings it will work (good or bad).
+Changing the advanced settings may have unexpected (and unwanted) consequences.

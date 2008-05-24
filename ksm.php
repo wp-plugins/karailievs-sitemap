@@ -3,11 +3,11 @@
 		Plugin Name: Karailiev's sitemap
 		Plugin URI: http://www.karailiev.net/karailievs-sitemap/
 		Description: Generates sitemap for spiders.
-		Version: 0.5.2
+		Version: 0.6
 		Author: Valentin Karailiev
 		Author URI: http://www.karailiev.net/
 	*/
-	$ksm_sitemap_version = "0.5.2";
+	$ksm_sitemap_version = "0.6";
 
 	// Add some default options if they don't exist
 	add_option('ksm_active', true);
@@ -17,7 +17,16 @@
 	add_option('ksm_tags', true);
 	add_option('ksm_path', "./");
 	add_option('ksm_last_ping', 0);
-
+	add_option('ksm_post_priority', 0.3);
+	add_option('ksm_post_frequency', 'weekly');
+	add_option('ksm_page_priority', 0.5);
+	add_option('ksm_page_frequency', 'monthly');
+	add_option('ksm_tag_priority', 0.1);
+	add_option('ksm_tag_frequency', 'weekly');
+	add_option('ksm_category_priority', 0.1);
+	add_option('ksm_category_frequency', 'weekly');
+	
+	
 	// Get options for form fields
 	$ksm_active = get_option('ksm_active');
 	$ksm_comments = get_option('ksm_comments');
@@ -96,6 +105,14 @@
 		$ksm_comments = get_option('ksm_comments');
 		$ksm_categories = get_option('ksm_categories');
 		$ksm_tags = get_option('ksm_tags');
+		$ksm_post_priority = get_option('ksm_post_priority');
+		$ksm_post_frequency = get_option('ksm_post_frequency');
+		$ksm_page_priority = get_option('ksm_page_priority');
+		$ksm_page_frequency = get_option('ksm_page_frequency');
+		$ksm_tag_priority = get_option('ksm_tag_priority');
+		$ksm_tag_frequency = get_option('ksm_tag_frequency');
+		$ksm_category_priority = get_option('ksm_category_priority');
+		$ksm_category_frequency = get_option('ksm_category_frequency');
 
 		$urls = array();
 
@@ -114,7 +131,7 @@
 		$homeLastUpdate = substr($homeLastUpdate, 0, 10);
 
 		$result = mysql_query("
-			SELECT `".$t."posts`.`ID`, `".$t."posts`.`post_modified`, `".$t."posts`.`post_name`
+			SELECT `".$t."posts`.`ID`, `".$t."posts`.`post_modified`, `".$t."posts`.`post_name`, `".$t."posts`.`post_type`
 			FROM `".$t."posts`
 			WHERE
 				(`".$t."posts`.`post_type`='page' OR `".$t."posts`.`post_type`='post')
@@ -148,8 +165,8 @@
 			$urls[$data['ID']] = array(
 				"url"		=> get_permalink($data['ID']),
 				"lastmod"	=> $date,
-				"changes"	=> "weekly",
-				"priority"	=> "0.3"
+				"changes"	=> $data['post_type']=="post"?$ksm_post_frequency:$ksm_page_frequency,
+				"priority"	=> $data['post_type']=="post"?$ksm_post_priority:$ksm_page_priority
 			);
 		}
 
@@ -169,13 +186,10 @@
 					AND ".$what_kind."
 			");
 			while ($data = mysql_fetch_assoc($result)) {
-				if ($data['taxonomy'] == "category") $u = get_category_link($data['term_id']);
-				elseif ($data['taxonomy'] == "post_tag") $u = get_tag_link($data['term_id']);
-				else continue;
 				$urls['testm_'.$data['term_id']] = array(
-					"url"		=> $u,
-					"changes"	=> "weekly",
-					"priority"	=> "0.1"
+					"url"		=> $data['taxonomy']=="post_tag"?get_tag_link($data['term_id']):get_category_link($data['term_id']),
+					"changes"	=> $data['taxonomy']=="post_tag"?$ksm_tag_frequency:$ksm_category_frequency,
+					"priority"	=> $data['taxonomy']=="post_tag"?$ksm_tag_priority:$ksm_category_priority
 				);
 			}
 		}
@@ -216,7 +230,7 @@
 
 		$ksm_last_ping = get_option('ksm_last_ping');
 		if ((time() - $ksm_last_ping) > 60 * 60) {
-			//get_headers("http://www.google.com/webmasters/tools/ping?sitemap=" . urlencode($home . $ksm_path . "sitemap.xml"));
+			//get_headers("http://www.google.com/webmasters/tools/ping?sitemap=" . urlencode($home . $ksm_path . "sitemap.xml"));	//PHP5+
 			$fp = @fopen("http://www.google.com/webmasters/tools/ping?sitemap=" . urlencode($home . $ksm_path . "sitemap.xml"), 80);
 			@fclose($fp);
 			update_option('ksm_last_ping', time());
@@ -236,10 +250,36 @@
 			update_option('ksm_attachments', $_POST['ksm_attachments']);
 			update_option('ksm_categories', $_POST['ksm_categories']);
 			update_option('ksm_tags', $_POST['ksm_tags']);
+			
 			$newPath = trim($_POST['ksm_path']);
 			if ($newPath == "" || $newPath == "/") $newPath = "./";
 			elseif ($newPath[strlen($newPath)-1] != "/") $newPath .= "/";
 			update_option('ksm_path', $newPath);
+			
+			if ($_POST['ksm_post_priority']>=0.1 && $_POST['ksm_post_priority']<=0.9) update_option('ksm_post_priority', $_POST['ksm_post_priority']);
+			else update_option('ksm_post_priority', 0.3);
+			
+			if ($_POST['ksm_page_priority']>=0.1 && $_POST['ksm_page_priority']<=0.9) update_option('ksm_page_priority', $_POST['ksm_page_priority']);
+			else update_option('ksm_page_priority', 0.5);
+			
+			if ($_POST['ksm_tag_priority']>=0.1 && $_POST['ksm_tag_priority']<=0.9) update_option('ksm_tag_priority', $_POST['ksm_tag_priority']);
+			else update_option('ksm_tag_priority', 0.1);
+			
+			if ($_POST['ksm_category_priority']>=0.1 && $_POST['ksm_category_priority']<=0.9) update_option('ksm_category_priority', $_POST['ksm_category_priority']);
+			else update_option('ksm_category_priority', 0.1);
+			
+			if ($_POST['ksm_post_frequency']=="hourly" || $_POST['ksm_post_frequency']=="daily" || $_POST['ksm_post_frequency']=="weekly" || $_POST['ksm_post_frequency']=="monthly" || $_POST['ksm_post_frequency']=="yearly") update_option('ksm_post_frequency', $_POST['ksm_post_frequency']);
+			else update_option('ksm_post_frequency', "weekly");
+			
+			if ($_POST['ksm_page_frequency']=="hourly" || $_POST['ksm_page_frequency']=="daily" || $_POST['ksm_page_frequency']=="weekly" || $_POST['ksm_page_frequency']=="monthly" || $_POST['ksm_page_frequency']=="yearly") update_option('ksm_page_frequency', $_POST['ksm_page_frequency']);
+			else update_option('ksm_page_frequency', "monthly");
+			
+			if ($_POST['ksm_tag_frequency']=="hourly" || $_POST['ksm_tag_frequency']=="daily" || $_POST['ksm_tag_frequency']=="weekly" || $_POST['ksm_tag_frequency']=="monthly" || $_POST['ksm_tag_frequency']=="yearly") update_option('ksm_tag_frequency', $_POST['ksm_tag_frequency']);
+			else update_option('ksm_tag_frequency', "weekly");
+			
+			if ($_POST['ksm_category_frequency']=="hourly" || $_POST['ksm_category_frequency']=="daily" || $_POST['ksm_category_frequency']=="weekly" || $_POST['ksm_category_frequency']=="monthly" || $_POST['ksm_category_frequency']=="yearly") update_option('ksm_category_frequency', $_POST['ksm_category_frequency']);
+			else update_option('ksm_category_frequency', "weekly");
+			
 			ksm_generate_sitemap();
 		}
 		$ksm_active = get_option('ksm_active');
@@ -248,6 +288,14 @@
 		$ksm_categories = get_option('ksm_categories');
 		$ksm_tags = get_option('ksm_tags');
 		$ksm_path = get_option('ksm_path');
+		$ksm_post_priority = get_option('ksm_post_priority');
+		$ksm_post_frequency = get_option('ksm_post_frequency');
+		$ksm_page_priority = get_option('ksm_page_priority');
+		$ksm_page_frequency = get_option('ksm_page_frequency');
+		$ksm_tag_priority = get_option('ksm_tag_priority');
+		$ksm_tag_frequency = get_option('ksm_tag_frequency');
+		$ksm_category_priority = get_option('ksm_category_priority');
+		$ksm_category_frequency = get_option('ksm_category_frequency');
 
 		$ksm_permission = ksm_permissions();
 		if ($ksm_permission == 3) $msg = "Error: sitemap.xml file exists but is not writable. <a href=\"http://www.karailiev.net/karailievs-sitemap/\" target=\"_blank\" >For help see the plugin's homepage</a>.";
@@ -285,6 +333,96 @@
 							<input name="ksm_attachments" type="checkbox" id="ksm_attachments" value="1" <?php echo $ksm_attachments?'checked="checked"':''; ?> />
 							Rebuild on attachments modifications.
 						</label><br />
+						
+						Default post priority: 
+						<select name="ksm_post_priority">
+							<option <?php echo $ksm_post_priority==0.9?'selected="selected"':'';?> value="0.9">0.9</option>
+							<option <?php echo $ksm_post_priority==0.8?'selected="selected"':'';?> value="0.8">0.8</option>
+							<option <?php echo $ksm_post_priority==0.7?'selected="selected"':'';?> value="0.7">0.7</option>
+							<option <?php echo $ksm_post_priority==0.6?'selected="selected"':'';?> value="0.6">0.6</option>
+							<option <?php echo $ksm_post_priority==0.5?'selected="selected"':'';?> value="0.5">0.5</option>
+							<option <?php echo $ksm_post_priority==0.4?'selected="selected"':'';?> value="0.4">0.4</option>
+							<option <?php echo $ksm_post_priority==0.3?'selected="selected"':'';?> value="0.3">0.3</option>
+							<option <?php echo $ksm_post_priority==0.2?'selected="selected"':'';?> value="0.2">0.2</option>
+							<option <?php echo $ksm_post_priority==0.1?'selected="selected"':'';?> value="0.1">0.1</option>
+						</select><br />
+						
+						Default post change frequency: 
+						<select name="ksm_post_frequency">
+							<option <?php echo $ksm_post_frequency=="hourly"?'selected="selected"':'';?> value="hourly">hourly</option>
+							<option <?php echo $ksm_post_frequency=="daily"?'selected="selected"':'';?> value="daily">daily</option>
+							<option <?php echo $ksm_post_frequency=="weekly"?'selected="selected"':'';?> value="weekly">weekly</option>
+							<option <?php echo $ksm_post_frequency=="monthly"?'selected="selected"':'';?> value="monthly">monthly</option>
+							<option <?php echo $ksm_post_frequency=="yearly"?'selected="selected"':'';?> value="yearly">yearly</option>
+						</select><br />
+						
+						Default page priority: 
+						<select name="ksm_page_priority">
+							<option <?php echo $ksm_page_priority==0.9?'selected="selected"':'';?> value="0.9">0.9</option>
+							<option <?php echo $ksm_page_priority==0.8?'selected="selected"':'';?> value="0.8">0.8</option>
+							<option <?php echo $ksm_page_priority==0.7?'selected="selected"':'';?> value="0.7">0.7</option>
+							<option <?php echo $ksm_page_priority==0.6?'selected="selected"':'';?> value="0.6">0.6</option>
+							<option <?php echo $ksm_page_priority==0.5?'selected="selected"':'';?> value="0.5">0.5</option>
+							<option <?php echo $ksm_page_priority==0.4?'selected="selected"':'';?> value="0.4">0.4</option>
+							<option <?php echo $ksm_page_priority==0.3?'selected="selected"':'';?> value="0.3">0.3</option>
+							<option <?php echo $ksm_page_priority==0.2?'selected="selected"':'';?> value="0.2">0.2</option>
+							<option <?php echo $ksm_page_priority==0.1?'selected="selected"':'';?> value="0.1">0.1</option>
+						</select><br />
+						
+						Default page change frequency: 
+						<select name="ksm_page_frequency">
+							<option <?php echo $ksm_page_frequency=="hourly"?'selected="selected"':'';?> value="hourly">hourly</option>
+							<option <?php echo $ksm_page_frequency=="daily"?'selected="selected"':'';?> value="daily">daily</option>
+							<option <?php echo $ksm_page_frequency=="weekly"?'selected="selected"':'';?> value="weekly">weekly</option>
+							<option <?php echo $ksm_page_frequency=="monthly"?'selected="selected"':'';?> value="monthly">monthly</option>
+							<option <?php echo $ksm_page_frequency=="yearly"?'selected="selected"':'';?> value="yearly">yearly</option>
+						</select><br />
+						
+						Default tag priority: 
+						<select name="ksm_tag_priority">
+							<option <?php echo $ksm_tag_priority==0.9?'selected="selected"':'';?> value="0.9">0.9</option>
+							<option <?php echo $ksm_tag_priority==0.8?'selected="selected"':'';?> value="0.8">0.8</option>
+							<option <?php echo $ksm_tag_priority==0.7?'selected="selected"':'';?> value="0.7">0.7</option>
+							<option <?php echo $ksm_tag_priority==0.6?'selected="selected"':'';?> value="0.6">0.6</option>
+							<option <?php echo $ksm_tag_priority==0.5?'selected="selected"':'';?> value="0.5">0.5</option>
+							<option <?php echo $ksm_tag_priority==0.4?'selected="selected"':'';?> value="0.4">0.4</option>
+							<option <?php echo $ksm_tag_priority==0.3?'selected="selected"':'';?> value="0.3">0.3</option>
+							<option <?php echo $ksm_tag_priority==0.2?'selected="selected"':'';?> value="0.2">0.2</option>
+							<option <?php echo $ksm_tag_priority==0.1?'selected="selected"':'';?> value="0.1">0.1</option>
+						</select><br />
+						
+						Default tag change frequency: 
+						<select name="ksm_tag_frequency">
+							<option <?php echo $ksm_tag_frequency=="hourly"?'selected="selected"':'';?> value="hourly">hourly</option>
+							<option <?php echo $ksm_tag_frequency=="daily"?'selected="selected"':'';?> value="daily">daily</option>
+							<option <?php echo $ksm_tag_frequency=="weekly"?'selected="selected"':'';?> value="weekly">weekly</option>
+							<option <?php echo $ksm_tag_frequency=="monthly"?'selected="selected"':'';?> value="monthly">monthly</option>
+							<option <?php echo $ksm_tag_frequency=="yearly"?'selected="selected"':'';?> value="yearly">yearly</option>
+						</select><br />
+						
+						Default category priority: 
+						<select name="ksm_category_priority">
+							<option <?php echo $ksm_category_priority==0.9?'selected="selected"':'';?> value="0.9">0.9</option>
+							<option <?php echo $ksm_category_priority==0.8?'selected="selected"':'';?> value="0.8">0.8</option>
+							<option <?php echo $ksm_category_priority==0.7?'selected="selected"':'';?> value="0.7">0.7</option>
+							<option <?php echo $ksm_category_priority==0.6?'selected="selected"':'';?> value="0.6">0.6</option>
+							<option <?php echo $ksm_category_priority==0.5?'selected="selected"':'';?> value="0.5">0.5</option>
+							<option <?php echo $ksm_category_priority==0.4?'selected="selected"':'';?> value="0.4">0.4</option>
+							<option <?php echo $ksm_category_priority==0.3?'selected="selected"':'';?> value="0.3">0.3</option>
+							<option <?php echo $ksm_category_priority==0.2?'selected="selected"':'';?> value="0.2">0.2</option>
+							<option <?php echo $ksm_category_priority==0.1?'selected="selected"':'';?> value="0.1">0.1</option>
+						</select><br />
+						
+						Default category change frequency: 
+						<select name="ksm_category_frequency">
+							<option <?php echo $ksm_category_frequency=="hourly"?'selected="selected"':'';?> value="hourly">hourly</option>
+							<option <?php echo $ksm_category_frequency=="daily"?'selected="selected"':'';?> value="daily">daily</option>
+							<option <?php echo $ksm_category_frequency=="weekly"?'selected="selected"':'';?> value="weekly">weekly</option>
+							<option <?php echo $ksm_category_frequency=="monthly"?'selected="selected"':'';?> value="monthly">monthly</option>
+							<option <?php echo $ksm_category_frequency=="yearly"?'selected="selected"':'';?> value="yearly">yearly</option>
+						</select><br />
+
+						
 					</td>
 				</tr>
 				<tr valign="top">
