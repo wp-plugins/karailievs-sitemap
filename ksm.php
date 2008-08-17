@@ -141,7 +141,7 @@
 	<!-- Created ".date("F d, Y, H:i")."-->
 	<url>
 		<loc>".$home."</loc>
-		<lastmod>".date(DATE_ATOM)."</lastmod>
+		<lastmod>".gmdate ("Y-m-d\TH:i:s\Z")."</lastmod>
 		<changefreq>weekly</changefreq>
 		<priority>1</priority>
 	</url>";

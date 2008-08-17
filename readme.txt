@@ -16,6 +16,10 @@ This plugin adds a XML sitemap to your blog.
 It's used to show all your pages and posts to the search engines like Google, Yahoo and MSN.
 
 
+= Changes in version 0.7.1: =
+* Date bug fix
+
+
 = Changes in version 0.7: =
 * Google news sitemap added. It shows the posts from the last 3 days. Writable file named `sitemap-news.xml` has to be created
 * Database query optimization
