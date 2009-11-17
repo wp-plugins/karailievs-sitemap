@@ -1,20 +1,28 @@
 === Karailiev's sitemap ===
 Contributors: Valentin Karailiev
-Tags: seo, sitemap, google, yahoo, msn, xml sitemap, xml
+Tags: seo, sitemap, google, yahoo, msn, xml sitemap, xml, news, news sitemap
 Requires at least: 2.5
 Tested up to: 2.8.6
 Stable tag: trunk
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=valentin%40karailiev%2enet&item_name=karailievs%2dsitemap&no_shipping=1&no_note=1&tax=0&currency_code=EUR&lc=US&bn=PP%2dDonationsBF&charset=UTF%2d8
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=ZQVJDMHJRWW3W&lc=US&item_name=Valentin%20Karailiev&item_number=wp_plugin_karailievs%2dsitemap&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted
 
 
-This plugin adds a XML sitemap to your blog.
+This plugin adds a XML sitemap and news sitemap to your blog.
 It's used to show all your pages and posts to the search engines like Google, Yahoo and MSN.
 
 
 == Description ==
-This plugin adds a XML sitemap to your blog.
+This plugin adds a XML sitemap and news sitemap to your blog.
 It's used to show all your pages and posts to the search engines like Google, Yahoo and MSN.
 
+
+= Changes in version 1.0: =
+* Feature: Custom priority for every page/post
+* Feature: Exclude pages/posts from sitemap
+* Feature: Include attachments in sitemap
+* Change: Configuration page reorganization 
+* Change: All settings are saved in a single variable
+* Fix: Can't create news sitemap if the general sitemap is turned off
 
 = Changes in version 0.7.1: =
 * Date bug fix
@@ -32,7 +40,7 @@ It's used to show all your pages and posts to the search engines like Google, Ya
 
 
 = Changes in version 0.5.1: =
-* Fixes some compability problems
+* Fixes some compatibility problems
 
 
 = Changes in version 0.5: =
@@ -58,18 +66,28 @@ It's used to show all your pages and posts to the search engines like Google, Ya
 * Sitemap generates URLs according the permalinks settings
 
 == Installation ==
+1. Download the archive
 1. Upload `karailievs-sitemap` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Create a file named sitemap.xml in your blog folder. The file must be writable for the web server. See more instructions on [plugin's homepage](http://www.karailiev.net/karailievs-sitemap/)
-1. Turn the sitemap on via the Settings -> Sitemap screen
-1. Open your sitemap to test it (e.g. http://www.karailiev.net/sitemap.xml)
+1. Create a file named sitemap.xml in your blog folder. The file must be writable for the web server. See more instructions on [plugin's homepage](http://blog.karailiev.net/karailievs-sitemap/)
+1. Go to Settings -> Sitemap to configure
+1. Open your sitemap to test it (e.g. http://blog.karailiev.net/sitemap.xml)
 
 
 == Frequently Asked Questions ==
 = Does this plugin ping Google on change? =
 Yes, it does.
 
-= Can I mess everything up? =
-I've tried to make the plugin easy to use and configure.
-Until you do not change the advanced settings it will work (good or bad).
-Changing the advanced settings may have unexpected (and unwanted) consequences.
+= Does this plugin generate news sitemap? =
+Yes, it does.
+
+= Does this plugin include attachments? =
+Yes, it does (see the configuration).
+
+= Can I exclude pages/posts from the sitemap? =
+Yes, you can. There is a "Sitmap" box on the page/post edit page.
+You can set there custom priority or you can exclude the page/post from the sitemap. 
+
+= Can I set specific priority ot pages/posts? =
+Yes, you can. There is a "Sitmap" box on the page/post edit page.
+You can set there custom priority or you can exclude the page/post from the sitemap.
