@@ -1,7 +1,7 @@
 === Karailiev's sitemap ===
 Contributors: Valentin Karailiev
 Tags: seo, sitemap, google, yahoo, msn, xml sitemap, xml, news, news sitemap
-Requires at least: 2.5
+Requires at least: 4.0
 Tested up to: 2.9.1
 Stable tag: trunk
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=ZQVJDMHJRWW3W&lc=US&item_name=Valentin%20Karailiev&item_number=wp_plugin_karailievs%2dsitemap&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted
@@ -69,9 +69,9 @@ It's used to show all your pages and posts to the search engines like Google, Ya
 1. Download the archive
 1. Upload `karailievs-sitemap` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Create a file named sitemap.xml in your blog folder. The file must be writable for the web server. See more instructions on [plugin's homepage](http://blog.karailiev.net/karailievs-sitemap/)
+1. Create a file named sitemap.xml in your blog folder. The file must be writable for the web server.
 1. Go to Settings -> Sitemap to configure
-1. Open your sitemap to test it (e.g. http://blog.karailiev.net/sitemap.xml)
+1. Open your sitemap to test it (e.g. http://www.example.com/sitemap.xml)
 
 
 == Frequently Asked Questions ==
