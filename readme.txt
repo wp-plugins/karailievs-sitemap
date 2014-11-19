@@ -16,6 +16,9 @@ This plugin adds a XML sitemap and news sitemap to your blog.
 It's used to show all your pages and posts to the search engines like Google, Yahoo and MSN.
 
 
+= Changes in version 1.1: =
+* Change: Removing links to the old documentation
+
 = Changes in version 1.0: =
 * Feature: Custom priority for every page/post
 * Feature: Exclude pages/posts from sitemap
